@@ -4,10 +4,10 @@
   --color-background: #121212;
   --color-foreground: #ffffff;
   --color-accent: #007BFF;
-  
-  --shadow-neu-flat: 5px 5px 12px #0a0a0a, -5px -5px 12px #1e1e1e;
-  --shadow-neu-pressed: inset 4px 4px 8px #0a0a0a, inset -4px -4px 8px #1e1e1e;
-  
+
+  --shadow-neu-flat: 8px 8px 16px #000000, -8px -8px 16px #2a2a2a;
+  --shadow-neu-pressed: inset 6px 6px 12px #000000, inset -6px -6px 12px #262626;
+
   --drop-shadow-glow: 0 0 20px rgba(0, 123, 255, 0.4);
 }
 

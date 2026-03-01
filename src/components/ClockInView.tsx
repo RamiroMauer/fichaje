@@ -39,7 +39,7 @@ export function ClockInView({ employeeName, onClockIn, onCancel }: Props) {
                 }}
                 className={`
           w-56 h-56 rounded-full flex flex-col items-center justify-center 
-          bg-[#121212] border-4 border-[var(--color-accent)] 
+          bg-gradient-to-br from-[#161616] to-[#101010] border-4 border-[var(--color-accent)] 
           text-[var(--color-accent)] font-bold text-3xl tracking-widest
           cursor-pointer select-none
         `}

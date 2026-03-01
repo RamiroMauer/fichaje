@@ -56,8 +56,8 @@ export function PinPad({ onComplete, isError, onErrorReset }: Props) {
                     <div
                         key={index}
                         className={`w-4 h-4 rounded-full transition-all duration-300 ${index < pin.length
-                                ? 'bg-[var(--color-accent)] shadow-[var(--drop-shadow-glow)] scale-110'
-                                : 'bg-[#1e1e1e] shadow-[inset_2px_2px_4px_#0a0a0a,inset_-2px_-2px_4px_#2a2a2a]'
+                            ? 'bg-[var(--color-accent)] shadow-[var(--drop-shadow-glow)] scale-110'
+                            : 'bg-[#1e1e1e] shadow-[inset_6px_6px_12px_#000000,inset_-6px_-6px_12px_#262626]'
                             }`}
                     />
                 ))}
