@@ -1,0 +1,79 @@
+'use client'
+
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { motion } from 'framer-motion'
+import { adminLogout } from '@/app/actions/admin'
+import {
+    LayoutDashboard,
+    Users,
+    Layers,
+    KeyRound,
+    ScrollText,
+    ShieldAlert,
+    LogOut,
+} from 'lucide-react'
+
+const NAV_ITEMS = [
+    { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
+    { href: '/admin/cashiers', label: 'Cajeros', icon: Users },
+    { href: '/admin/stations', label: 'Estaciones', icon: Layers },
+    { href: '/admin/pins', label: 'PINs', icon: KeyRound },
+    { href: '/admin/logs', label: 'Logs', icon: ScrollText },
+    { href: '/admin/locks', label: 'Bloqueos', icon: ShieldAlert },
+]
+
+export function AdminSidebar() {
+    const pathname = usePathname()
+
+    return (
+        <aside className="flex flex-col w-64 min-h-screen bg-[#121212] p-6 gap-2"
+            style={{ boxShadow: '4px 0 20px #000000' }}>
+            {/* Logo / Branding */}
+            <div className="mb-8">
+                <h1 className="text-xl font-black tracking-widest text-white">CASINO<span className="text-[#007BFF]">CLOCK</span></h1>
+                <p className="text-xs text-gray-600 mt-1 tracking-widest">PANEL ADMIN</p>
+            </div>
+
+            {/* Navigation */}
+            <nav className="flex flex-col gap-2 flex-1">
+                {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+                    const isActive = pathname === href
+                    return (
+                        <Link key={href} href={href}>
+                            <motion.div
+                                whileTap={{ scale: 0.96 }}
+                                className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200 cursor-pointer select-none ${isActive
+                                        ? 'bg-[#121212] text-[#007BFF]'
+                                        : 'text-gray-400 hover:text-white'
+                                    }`}
+                                style={{
+                                    boxShadow: isActive ? 'inset 4px 4px 8px #000000, inset -4px -4px 8px #202020' : 'none',
+                                }}
+                            >
+                                <Icon size={18} />
+                                <span className="text-sm font-semibold tracking-wide">{label}</span>
+                                {isActive && (
+                                    <div className="ml-auto w-1.5 h-1.5 rounded-full bg-[#007BFF]"
+                                        style={{ boxShadow: '0 0 6px rgba(0,123,255,0.8)' }} />
+                                )}
+                            </motion.div>
+                        </Link>
+                    )
+                })}
+            </nav>
+
+            {/* Logout */}
+            <form action={adminLogout}>
+                <motion.button
+                    type="submit"
+                    whileTap={{ scale: 0.95 }}
+                    className="flex items-center gap-3 w-full px-4 py-3 rounded-2xl text-gray-500 hover:text-[#FF3B30] transition-colors duration-200 text-sm font-semibold tracking-wide cursor-pointer"
+                >
+                    <LogOut size={18} />
+                    Cerrar sesión
+                </motion.button>
+            </form>
+        </aside>
+    )
+}
