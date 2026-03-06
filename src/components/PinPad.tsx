@@ -56,11 +56,10 @@ export function PinPad({ onComplete, isError, onErrorReset }: Props) {
                         key={index}
                         className="w-4 h-4 rounded-full transition-all duration-300"
                         style={{
-                            // bg + box-shadow en el MISMO elemento con border-radius:50% → sin halo rectangular
                             backgroundColor: index < pin.length ? 'var(--color-accent)' : '#1a1a1a',
                             boxShadow: index < pin.length
-                                ? '0 0 12px rgba(0,123,255,0.7)'
-                                : 'inset 3px 3px 6px #000000, inset -3px -3px 6px #222222',
+                                ? '0 0 6px rgba(0,123,255,0.4)'
+                                : 'inset 2px 2px 5px #000000, inset -2px -2px 4px #202020',
                             transform: index < pin.length ? 'scale(1.1)' : 'scale(1)',
                             isolation: 'isolate',
                         }}

@@ -74,11 +74,11 @@ export function StationFlow({ stationId, employees }: StationFlowProps) {
       deviceInfo: navigator.userAgent // Pasamos deviceInfo opcional
     });
 
-    if (response.ok) {
+    if ('ok' in response) {
       setMachineState("SUCCESS");
     } else {
       if (response.error === 'LOCKED' && 'unlockSeconds' in response) {
-        setLockSeconds(response.unlockSeconds);
+        setLockSeconds((response as any).unlockSeconds);
         setErrorMessage("Demasiados intentos incorrectos.");
         setMachineState("LOCKED");
       } else if (response.error === 'INVALID_PIN') {

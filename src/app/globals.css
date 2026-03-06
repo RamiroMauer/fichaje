@@ -5,12 +5,21 @@
   --color-foreground: #ffffff;
   --color-accent: #007BFF;
 
-  /* Sombras neumórficas — aplicar siempre en el MISMO elemento que tiene border-radius */
-  --shadow-neu-flat: 8px 8px 20px #000000, -6px -6px 14px #202020;
-  --shadow-neu-pressed: inset 5px 5px 10px #000000, inset -5px -5px 10px #1e1e1e;
-  --shadow-neu-subtle: 4px 4px 10px #000000, -3px -3px 8px #1c1c1c;
+  /* ── Sombras neumórficas ──────────────────────────────────────
+     Regla: el mismo elemento que define border-radius controla
+     el fondo Y la sombra. No separar estas tres propiedades.
+     
+     Ajuste: highlight reducido de #202020 → #1a1a1a para que
+     el halo claro sea menos notorio sobre fondos oscuros.
+     Blur también reducido (flat: 20→14, subtle: 10→8).
+  ───────────────────────────────────────────────────────────── */
+  --shadow-neu-flat: 6px 6px 14px #000000, -4px -4px 10px #1a1a1a;
+  --shadow-neu-pressed: inset 4px 4px 8px #000000, inset -3px -3px 7px #1a1a1a;
+  --shadow-neu-subtle: 3px 3px 8px #000000, -2px -2px 6px #181818;
 
-  --drop-shadow-glow: 0 0 20px rgba(0, 123, 255, 0.4);
+  /* Glow de acento: blur reducido 20→8px, opacidad 0.4→0.25 */
+  --drop-shadow-glow: 0 0 8px rgba(0, 123, 255, 0.25);
+  --glow-accent: 0 0 8px rgba(0, 123, 255, 0.3);
 }
 
 :root {
@@ -33,21 +42,18 @@ body {
 
 /* ──────────────────────────────────────────────────────────────
    Neumorphism Utility Classes — convención global
-   Regla: el mismo elemento que define border-radius controla
-   el fondo Y la sombra. Nunca separar estos tres en capas distintas.
-   isolation: isolate evita que la sombra interactúe con capas externas.
+   • bg + box-shadow + border-radius siempre en el mismo elemento
+   • isolation: isolate evita sombras que "se filtran" hacia afuera
    ────────────────────────────────────────────────────────────── */
 
-/* Card / Panel neumórfico convexo */
 .neu-card {
   background-color: #121212;
   box-shadow: var(--shadow-neu-flat);
-  border-radius: 1.5rem; /* 24px — mínimo del sistema */
+  border-radius: 1.5rem;
   overflow: hidden;
   isolation: isolate;
 }
 
-/* Card cóncava / pressed */
 .neu-pressed {
   background-color: #121212;
   box-shadow: var(--shadow-neu-pressed);
@@ -56,16 +62,14 @@ body {
   isolation: isolate;
 }
 
-/* Input / campo de forma cóncava */
 .neu-input {
   background-color: #121212;
-  box-shadow: inset 4px 4px 8px #000000, inset -4px -4px 8px #1e1e1e;
+  box-shadow: inset 3px 3px 7px #000000, inset -3px -3px 6px #1a1a1a;
   border-radius: 1rem;
   overflow: hidden;
   isolation: isolate;
 }
 
-/* Elemento interactivo convexo pequeño */
 .neu-interactive {
   background-color: #121212;
   box-shadow: var(--shadow-neu-subtle);
@@ -79,14 +83,13 @@ body {
   box-shadow: var(--shadow-neu-pressed);
 }
 
-/* Focus ring que respeta border-radius */
+/* Focus ring — sutil, sin glow exagerado */
 .neu-focus:focus-visible {
-  outline: 2px solid rgba(0, 123, 255, 0.6);
+  outline: 1.5px solid rgba(0, 123, 255, 0.4);
   outline-offset: 2px;
   border-radius: inherit;
 }
 
-/* Elimina el focus ring cuadrado nativo del browser en todos los botones */
 button:focus-visible,
 a:focus-visible,
 input:focus-visible,

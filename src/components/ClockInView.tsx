@@ -28,7 +28,7 @@ export function ClockInView({ employeeName, onClockIn, onCancel }: Props) {
                 animate={{
                     boxShadow: [
                         "var(--shadow-neu-flat)",
-                        "0 0 25px rgba(0, 123, 255, 0.5), var(--shadow-neu-flat)",
+                        "0 0 10px rgba(0, 123, 255, 0.25), var(--shadow-neu-flat)",
                         "var(--shadow-neu-flat)",
                     ]
                 }}
