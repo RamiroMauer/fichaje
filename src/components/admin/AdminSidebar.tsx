@@ -9,6 +9,7 @@ import {
     Users,
     Layers,
     KeyRound,
+    QrCode,
     ScrollText,
     ShieldAlert,
     LogOut,
@@ -19,6 +20,7 @@ const NAV_ITEMS = [
     { href: '/admin/cashiers', label: 'Cajeros', icon: Users },
     { href: '/admin/stations', label: 'Estaciones', icon: Layers },
     { href: '/admin/pins', label: 'PINs', icon: KeyRound },
+    { href: '/admin/qrs', label: 'QR Codes', icon: QrCode },
     { href: '/admin/logs', label: 'Logs', icon: ScrollText },
     { href: '/admin/locks', label: 'Bloqueos', icon: ShieldAlert },
 ]
