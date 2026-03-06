@@ -76,7 +76,6 @@ export default function StationsPage() {
                 <p className="text-xs text-gray-500 tracking-widest">ASIGNACIÓN DE CAJEROS (4 POR CAJA)</p>
             </div>
 
-            {/* Station Tabs */}
             <div className="flex gap-3 mb-8 flex-wrap">
                 {stations.map((s) => (
                     <NeumorphicButton
@@ -90,8 +89,8 @@ export default function StationsPage() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Assigned Slots */}
-                <div>
+                {/* Assigned Slots — neu-card engloba todo el panel izquierdo */}
+                <div className="neu-card p-6">
                     <p className="text-xs text-gray-500 tracking-widest mb-4">
                         ASIGNADOS — <span className={assigned.length === REQUIRED ? 'text-[#007BFF]' : 'text-[#FF3B30]'}>{assigned.length}/{REQUIRED}</span>
                     </p>
@@ -107,7 +106,11 @@ export default function StationsPage() {
                                             animate={{ opacity: 1, x: 0 }}
                                             exit={{ opacity: 0, x: 10 }}
                                             className="flex items-center gap-3 px-5 py-3 rounded-2xl bg-[#121212]"
-                                            style={{ boxShadow: '6px 6px 12px #000000, -6px -6px 12px #1e1e1e' }}
+                                            style={{
+                                                // bg + shadow + border-radius en el mismo elemento
+                                                boxShadow: 'var(--shadow-neu-subtle)',
+                                                isolation: 'isolate',
+                                            }}
                                         >
                                             <UserCircle2 size={18} className="text-[#007BFF]" />
                                             <span className="flex-1 text-sm text-white">{c.display_name}</span>
@@ -142,13 +145,11 @@ export default function StationsPage() {
                 </div>
 
                 {/* Available Cashiers */}
-                <div>
+                <div className="neu-card p-6">
                     <p className="text-xs text-gray-500 tracking-widest mb-4">CAJEROS DISPONIBLES</p>
-                    <div
-                        className="flex items-center gap-2 px-4 py-3 rounded-2xl mb-4"
-                        style={{ boxShadow: 'inset 3px 3px 6px #000, inset -3px -3px 6px #1e1e1e' }}
-                    >
-                        <Search size={14} className="text-gray-600" />
+                    {/* Search input usando neu-input */}
+                    <div className="neu-input flex items-center gap-2 px-4 py-3 mb-4">
+                        <Search size={14} className="text-gray-600 shrink-0" />
                         <input
                             type="text"
                             placeholder="Buscar cajero..."
@@ -164,8 +165,11 @@ export default function StationsPage() {
                                 whileTap={{ scale: 0.97 }}
                                 onClick={() => addCashier(c)}
                                 disabled={assigned.length >= REQUIRED}
-                                className="flex items-center gap-3 px-5 py-3 rounded-2xl text-sm text-gray-400 hover:text-white transition-colors text-left disabled:opacity-30"
-                                style={{ boxShadow: '4px 4px 8px #000, -4px -4px 8px #1a1a1a' }}
+                                className="flex items-center gap-3 px-5 py-3 text-sm text-gray-400 hover:text-white transition-colors text-left disabled:opacity-30 rounded-2xl bg-[#121212]"
+                                style={{
+                                    boxShadow: 'var(--shadow-neu-subtle)',
+                                    isolation: 'isolate',
+                                }}
                             >
                                 <UserCircle2 size={16} className="text-gray-600" />
                                 {c.display_name}

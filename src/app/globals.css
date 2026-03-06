@@ -5,8 +5,10 @@
   --color-foreground: #ffffff;
   --color-accent: #007BFF;
 
-  --shadow-neu-flat: 8px 8px 16px #000000, -8px -8px 16px #2a2a2a;
-  --shadow-neu-pressed: inset 6px 6px 12px #000000, inset -6px -6px 12px #262626;
+  /* Sombras neumórficas — aplicar siempre en el MISMO elemento que tiene border-radius */
+  --shadow-neu-flat: 8px 8px 20px #000000, -6px -6px 14px #202020;
+  --shadow-neu-pressed: inset 5px 5px 10px #000000, inset -5px -5px 10px #1e1e1e;
+  --shadow-neu-subtle: 4px 4px 10px #000000, -3px -3px 8px #1c1c1c;
 
   --drop-shadow-glow: 0 0 20px rgba(0, 123, 255, 0.4);
 }
@@ -27,4 +29,67 @@ body {
 
 * {
   box-sizing: inherit;
+}
+
+/* ──────────────────────────────────────────────────────────────
+   Neumorphism Utility Classes — convención global
+   Regla: el mismo elemento que define border-radius controla
+   el fondo Y la sombra. Nunca separar estos tres en capas distintas.
+   isolation: isolate evita que la sombra interactúe con capas externas.
+   ────────────────────────────────────────────────────────────── */
+
+/* Card / Panel neumórfico convexo */
+.neu-card {
+  background-color: #121212;
+  box-shadow: var(--shadow-neu-flat);
+  border-radius: 1.5rem; /* 24px — mínimo del sistema */
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* Card cóncava / pressed */
+.neu-pressed {
+  background-color: #121212;
+  box-shadow: var(--shadow-neu-pressed);
+  border-radius: 1.5rem;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* Input / campo de forma cóncava */
+.neu-input {
+  background-color: #121212;
+  box-shadow: inset 4px 4px 8px #000000, inset -4px -4px 8px #1e1e1e;
+  border-radius: 1rem;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* Elemento interactivo convexo pequeño */
+.neu-interactive {
+  background-color: #121212;
+  box-shadow: var(--shadow-neu-subtle);
+  border-radius: 1rem;
+  overflow: hidden;
+  isolation: isolate;
+  transition: box-shadow 0.2s ease-in-out;
+}
+
+.neu-interactive:active {
+  box-shadow: var(--shadow-neu-pressed);
+}
+
+/* Focus ring que respeta border-radius */
+.neu-focus:focus-visible {
+  outline: 2px solid rgba(0, 123, 255, 0.6);
+  outline-offset: 2px;
+  border-radius: inherit;
+}
+
+/* Elimina el focus ring cuadrado nativo del browser en todos los botones */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: none;
 }

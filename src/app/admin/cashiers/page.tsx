@@ -108,10 +108,8 @@ export default function CashiersPage() {
 
             <AdminModal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={editTarget ? 'Editar Cajero' : 'Nuevo Cajero'}>
                 <div className="flex flex-col gap-4">
-                    <div
-                        className="px-5 py-4 rounded-2xl"
-                        style={{ boxShadow: 'inset 4px 4px 8px #000000, inset -4px -4px 8px #1e1e1e' }}
-                    >
+                    {/* Input usando neu-input para consistencia global */}
+                    <div className="neu-input px-5 py-4">
                         <input
                             type="text"
                             placeholder="Nombre del cajero"

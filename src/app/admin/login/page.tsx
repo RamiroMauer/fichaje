@@ -25,22 +25,23 @@ export default function AdminLoginPage() {
                         animate={{ scale: 1 }}
                         transition={{ type: 'spring', delay: 0.1 }}
                         className="w-20 h-20 rounded-full bg-[#121212] flex items-center justify-center mx-auto mb-6"
-                        style={{ boxShadow: '8px 8px 16px #000000, -8px -8px 16px #1e1e1e' }}
+                        style={{
+                            // border-radius: 50% + box-shadow + bg en el MISMO elemento → sin halo rectangular
+                            boxShadow: 'var(--shadow-neu-flat)',
+                            isolation: 'isolate',
+                        }}
                     >
                         <Lock size={32} className="text-[#007BFF]" style={{ filter: 'drop-shadow(0 0 8px rgba(0,123,255,0.6))' }} />
                     </motion.div>
                     <h1 className="text-2xl font-black tracking-widest text-white mb-1">
                         CASINO<span className="text-[#007BFF]">CLOCK</span>
                     </h1>
-                    <p className="text-xs text-gray-500 tracking-widest">PANEL DE ENCARGADO</p>
+                    <p className="text-xs text-gray-500 tracking-widests">PANEL DE ENCARGADO</p>
                 </div>
 
-                {/* Form — usa un <form> nativo con action para que Next.js maneje el Server Action y el redirect() seteando la cookie correctamente */}
                 <form action={action} className="flex flex-col gap-4">
-                    <div
-                        className="flex items-center gap-3 px-5 py-4 rounded-2xl bg-[#121212]"
-                        style={{ boxShadow: 'inset 4px 4px 8px #000000, inset -4px -4px 8px #1e1e1e' }}
-                    >
+                    {/* Input con neu-input — sombra, bg y border-radius en un solo contenedor */}
+                    <div className="neu-input flex items-center gap-3 px-5 py-4">
                         <input
                             type={showPass ? 'text' : 'password'}
                             name="password"
@@ -58,7 +59,6 @@ export default function AdminLoginPage() {
                         </button>
                     </div>
 
-                    {/* Error del server */}
                     {state && !state.ok && (
                         <motion.p
                             initial={{ opacity: 0 }}

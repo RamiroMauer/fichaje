@@ -20,10 +20,8 @@ export function AdminTable<T extends Record<string, any>>({
     emptyMessage = 'Sin resultados.',
 }: AdminTableProps<T>) {
     return (
-        <div
-            className="rounded-3xl overflow-hidden"
-            style={{ boxShadow: '8px 8px 16px #000000, -8px -8px 16px #1e1e1e' }}
-        >
+        // neu-card garantiza que border-radius, overflow:hidden y box-shadow estén en el mismo elemento
+        <div className="neu-card">
             <table className="w-full text-sm">
                 <thead>
                     <tr className="border-b border-[#1e1e1e]">

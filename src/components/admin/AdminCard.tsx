@@ -18,8 +18,7 @@ export function AdminCard({ title, value, icon, className = '', onClick, childre
         <motion.div
             whileTap={onClick ? { scale: 0.97 } : {}}
             onClick={onClick}
-            className={`bg-[#121212] rounded-3xl p-6 flex flex-col gap-3 ${onClick ? 'cursor-pointer' : ''} ${className}`}
-            style={{ boxShadow: '8px 8px 16px #000000, -8px -8px 16px #1e1e1e' }}
+            className={`neu-card p-6 flex flex-col gap-3 ${onClick ? 'cursor-pointer' : ''} ${className}`}
         >
             {(icon || title) && (
                 <div className="flex items-center justify-between">

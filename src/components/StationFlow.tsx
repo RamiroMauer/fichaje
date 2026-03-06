@@ -31,6 +31,7 @@ export function StationFlow({ stationId, employees }: StationFlowProps) {
 
   // Invalid Station / No employees screen
   if (!employees || employees.length === 0) {
+    // Invalid Station / No employees screen
     return (
       <div className="flex flex-col items-center justify-center text-center gap-6 w-full max-w-sm">
         <div className="mb-6">
@@ -40,7 +41,8 @@ export function StationFlow({ stationId, employees }: StationFlowProps) {
           <p className="text-gray-500 text-sm">Estación inválida o vacía</p>
         </div>
 
-        <div className="p-8 rounded-2xl bg-[var(--color-background)]" style={{ boxShadow: "var(--shadow-neu-pressed)" }}>
+        {/* neu-pressed: bg + shadow en el mismo elemento con border-radius → sin halo rectangular */}
+        <div className="neu-pressed p-8 w-full">
           <p className="text-gray-400 mb-6 text-sm leading-relaxed">
             La estación "{stationId}" no está registrada en el sistema o no tiene cajeros asignados. Por favor, escanee un código QR válido.
           </p>
@@ -199,7 +201,8 @@ export function StationFlow({ stationId, employees }: StationFlowProps) {
             <motion.div
               animate={{ rotate: [-5, 5, -5, 5, 0] }}
               transition={{ repeat: Infinity, duration: 2, repeatDelay: 1 }}
-              className="w-24 h-24 rounded-full bg-[#121212] flex items-center justify-center shadow-[var(--shadow-neu-flat)]"
+              className="w-24 h-24 rounded-full bg-[#121212] flex items-center justify-center"
+              style={{ boxShadow: "var(--shadow-neu-flat)", isolation: "isolate" }}
             >
               <LockIcon size={40} className="text-[#FF3B30]" />
             </motion.div>
@@ -234,7 +237,7 @@ export function StationFlow({ stationId, employees }: StationFlowProps) {
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
               className="w-32 h-32 rounded-full bg-[#121212] flex items-center justify-center mb-4"
-              style={{ boxShadow: "var(--shadow-neu-flat)" }}
+              style={{ boxShadow: "var(--shadow-neu-flat)", isolation: "isolate" }}
             >
               <CheckCircle2 size={64} className="text-[var(--color-accent)]" />
             </motion.div>

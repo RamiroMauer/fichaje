@@ -71,28 +71,28 @@ export default function PinsPage() {
                 <AdminTable columns={columns} rows={cashiers} emptyMessage="No hay cajeros activos." />
             )}
 
-            <AdminModal
-                isOpen={!!pinModal}
-                onClose={() => setPinModal(null)}
-                title="PIN Generado"
-            >
+            <AdminModal isOpen={!!pinModal} onClose={() => setPinModal(null)} title="PIN Generado">
                 {pinModal && (
                     <motion.div className="flex flex-col items-center gap-6 text-center">
                         <div>
                             <p className="text-gray-500 text-xs mb-1">{pinModal.cashierName}</p>
                             <p className="text-xs text-[#FF3B30] font-bold tracking-widest mb-4">SE MUESTRA SOLO UNA VEZ</p>
+                            {/* Contenedor del PIN: neu-pressed + text-shadow → sin layer rectangular separada */}
                             <motion.div
                                 initial={{ scale: 0.8 }}
                                 animate={{ scale: 1 }}
-                                className="text-7xl font-black text-white tracking-[0.3em] px-8 py-6 rounded-3xl bg-[#121212]"
-                                style={{ boxShadow: 'inset 6px 6px 12px #000, inset -6px -6px 12px #1e1e1e', textShadow: '0 0 30px rgba(0,123,255,0.5)' }}
+                                className="neu-pressed text-7xl font-black text-white tracking-[0.3em] px-8 py-6"
+                                style={{ textShadow: '0 0 30px rgba(0,123,255,0.5)' }}
                             >
                                 {pinModal.pin}
                             </motion.div>
                         </div>
 
                         <NeumorphicButton onClick={handleCopy} className="px-6 py-3 gap-2 text-sm w-full">
-                            {copied ? <><CheckCheck size={16} className="text-[#007BFF]" /> COPIADO</> : <><Copy size={16} /> COPIAR PIN</>}
+                            {copied
+                                ? <><CheckCheck size={16} className="text-[#007BFF]" /> COPIADO</>
+                                : <><Copy size={16} /> COPIAR PIN</>
+                            }
                         </NeumorphicButton>
 
                         <p className="text-gray-700 text-xs">

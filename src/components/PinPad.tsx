@@ -17,7 +17,6 @@ export function PinPad({ onComplete, isError, onErrorReset }: Props) {
 
     useEffect(() => {
         if (isError) {
-            // Shake animation
             controls.start({
                 x: [0, -10, 10, -10, 10, -5, 5, 0],
                 transition: { duration: 0.4 }
@@ -50,15 +49,21 @@ export function PinPad({ onComplete, isError, onErrorReset }: Props) {
 
     return (
         <motion.div animate={controls} className="flex flex-col items-center gap-8">
-            {/* Visual Display for PIN */}
+            {/* Indicadores de PIN — cada dot: bg + sombra en el mismo elemento redondeado */}
             <div className="flex gap-6 mb-2">
                 {[0, 1, 2, 3].map((index) => (
                     <div
                         key={index}
-                        className={`w-4 h-4 rounded-full transition-all duration-300 ${index < pin.length
-                            ? 'bg-[var(--color-accent)] shadow-[var(--drop-shadow-glow)] scale-110'
-                            : 'bg-[#1e1e1e] shadow-[inset_6px_6px_12px_#000000,inset_-6px_-6px_12px_#262626]'
-                            }`}
+                        className="w-4 h-4 rounded-full transition-all duration-300"
+                        style={{
+                            // bg + box-shadow en el MISMO elemento con border-radius:50% → sin halo rectangular
+                            backgroundColor: index < pin.length ? 'var(--color-accent)' : '#1a1a1a',
+                            boxShadow: index < pin.length
+                                ? '0 0 12px rgba(0,123,255,0.7)'
+                                : 'inset 3px 3px 6px #000000, inset -3px -3px 6px #222222',
+                            transform: index < pin.length ? 'scale(1.1)' : 'scale(1)',
+                            isolation: 'isolate',
+                        }}
                     />
                 ))}
             </div>
@@ -69,7 +74,7 @@ export function PinPad({ onComplete, isError, onErrorReset }: Props) {
                         {d}
                     </NeumorphicButton>
                 ))}
-                <div /> {/* Empty slot for alignment */}
+                <div /> {/* Empty slot */}
                 <NeumorphicButton onClick={() => handlePress("0")} className="w-16 h-16 text-xl">
                     0
                 </NeumorphicButton>

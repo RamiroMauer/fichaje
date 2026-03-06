@@ -79,7 +79,13 @@ export default function LocksPage() {
                     animate={{ opacity: 1 }}
                     className="flex flex-col items-center justify-center py-20 gap-4"
                 >
-                    <ShieldCheck size={48} className="text-[#007BFF]" style={{ filter: 'drop-shadow(0 0 12px rgba(0,123,255,0.4))' }} />
+                    {/* Ícono con sombra + bg en el mismo elemento — sin wrapper rectangular separado */}
+                    <div
+                        className="w-20 h-20 rounded-full bg-[#121212] flex items-center justify-center"
+                        style={{ boxShadow: 'var(--shadow-neu-flat)', isolation: 'isolate' }}
+                    >
+                        <ShieldCheck size={36} className="text-[#007BFF]" style={{ filter: 'drop-shadow(0 0 8px rgba(0,123,255,0.5))' }} />
+                    </div>
                     <p className="text-gray-500 text-sm tracking-widest">SIN BLOQUEOS ACTIVOS</p>
                 </motion.div>
             ) : (
