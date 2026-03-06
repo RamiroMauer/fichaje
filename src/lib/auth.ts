@@ -18,7 +18,7 @@ export function signToken(payload: string): string {
     return `${payload}.${sig}`
 }
 
-/** Verifica que el token sea auténtico y no esté expirado */
+/** Verifica token en Node.js runtime (Server Actions, Server Components) */
 export function verifyToken(token: string): boolean {
     try {
         const lastDot = token.lastIndexOf('.')
@@ -32,15 +32,48 @@ export function verifyToken(token: string): boolean {
         hmac.update(payload)
         const expectedSig = hmac.digest('hex')
 
-        // Comparación time-safe para evitar timing attacks
+        if (sig.length !== expectedSig.length) return false
         const sigBuf = Buffer.from(sig)
         const expectedBuf = Buffer.from(expectedSig)
-        if (sigBuf.length !== expectedBuf.length) return false
         if (!timingSafeEqual(sigBuf, expectedBuf)) return false
 
-        // Verificar expiración
-        const [, expiresAtStr] = payload.split(':')
-        const expiresAt = parseInt(expiresAtStr, 10)
+        const parts = payload.split(':')
+        const expiresAt = parseInt(parts[1], 10)
+        return Date.now() < expiresAt
+    } catch {
+        return false
+    }
+}
+
+/** 
+ * Verifica token en Edge Runtime (Middleware de Next.js).
+ * Edge no tiene `crypto` de Node.js — usa la Web Crypto API.
+ */
+export async function verifyTokenEdge(token: string, secret: string): Promise<boolean> {
+    try {
+        const lastDot = token.lastIndexOf('.')
+        if (lastDot === -1) return false
+
+        const payload = token.substring(0, lastDot)
+        const sig = token.substring(lastDot + 1)
+
+        const enc = new TextEncoder()
+        const keyMaterial = await crypto.subtle.importKey(
+            'raw',
+            enc.encode(secret),
+            { name: 'HMAC', hash: 'SHA-256' },
+            false,
+            ['sign']
+        )
+        const sigBytes = await crypto.subtle.sign('HMAC', keyMaterial, enc.encode(payload))
+        const expectedSig = [...new Uint8Array(sigBytes)]
+            .map(b => b.toString(16).padStart(2, '0'))
+            .join('')
+
+        if (sig !== expectedSig) return false
+
+        const parts = payload.split(':')
+        const expiresAt = parseInt(parts[1], 10)
         return Date.now() < expiresAt
     } catch {
         return false

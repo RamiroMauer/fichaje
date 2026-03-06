@@ -1,34 +1,15 @@
 'use client'
 
-import { Suspense, useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useActionState } from 'react'
 import { motion } from 'framer-motion'
 import { NeumorphicButton } from '@/components/NeumorphicButton'
 import { adminLogin } from '@/app/actions/admin'
 import { Lock, Eye, EyeOff } from 'lucide-react'
+import { useState } from 'react'
 
 export default function AdminLoginPage() {
-    const [password, setPassword] = useState('')
-    const [error, setError] = useState('')
-    const [loading, setLoading] = useState(false)
+    const [state, action, pending] = useActionState(adminLogin, undefined)
     const [showPass, setShowPass] = useState(false)
-    const router = useRouter()
-    const searchParams = useSearchParams()
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-        setLoading(true)
-        setError('')
-
-        const result = await adminLogin(password)
-        if (result.ok) {
-            const from = searchParams.get('from') || '/admin'
-            router.push(from)
-        } else {
-            setError(result.message)
-            setLoading(false)
-        }
-    }
 
     return (
         <div className="min-h-screen bg-[#121212] flex items-center justify-center p-4">
@@ -54,19 +35,19 @@ export default function AdminLoginPage() {
                     <p className="text-xs text-gray-500 tracking-widest">PANEL DE ENCARGADO</p>
                 </div>
 
-                {/* Form */}
-                <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                {/* Form — usa un <form> nativo con action para que Next.js maneje el Server Action y el redirect() seteando la cookie correctamente */}
+                <form action={action} className="flex flex-col gap-4">
                     <div
                         className="flex items-center gap-3 px-5 py-4 rounded-2xl bg-[#121212]"
                         style={{ boxShadow: 'inset 4px 4px 8px #000000, inset -4px -4px 8px #1e1e1e' }}
                     >
                         <input
                             type={showPass ? 'text' : 'password'}
+                            name="password"
                             placeholder="Contraseña de encargado"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
                             className="flex-1 bg-transparent text-white placeholder-gray-600 outline-none text-sm tracking-wider"
                             autoComplete="current-password"
+                            autoFocus
                         />
                         <button
                             type="button"
@@ -77,22 +58,23 @@ export default function AdminLoginPage() {
                         </button>
                     </div>
 
-                    {error && (
+                    {/* Error del server */}
+                    {state && !state.ok && (
                         <motion.p
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             className="text-[#FF3B30] text-xs text-center tracking-wide"
                         >
-                            {error}
+                            {state.message}
                         </motion.p>
                     )}
 
                     <NeumorphicButton
                         onClick={() => { }}
                         className="w-full py-4 text-sm tracking-widest"
-                        disabled={loading || !password}
+                        disabled={pending}
                     >
-                        {loading ? 'VERIFICANDO...' : 'INGRESAR'}
+                        {pending ? 'VERIFICANDO...' : 'INGRESAR'}
                     </NeumorphicButton>
                 </form>
             </motion.div>

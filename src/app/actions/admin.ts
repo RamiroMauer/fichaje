@@ -32,8 +32,12 @@ type ActionResult<T = undefined> =
 // ─────────────────────────────────────────────
 
 export async function adminLogin(
-    password: string
+    _prevState: any,
+    formData: FormData
 ): Promise<ActionResult> {
+    const password = formData.get('password') as string
+    const from = (formData.get('from') as string) || '/admin'
+
     const adminPassword = process.env.ADMIN_PASSWORD
     if (!adminPassword) {
         return { ok: false, code: 'CONFIG_ERROR', message: 'ADMIN_PASSWORD no configurado.' }
@@ -47,7 +51,7 @@ export async function adminLogin(
     const cookieStore = await cookies()
     cookieStore.set(SESSION_COOKIE_NAME, token, getSessionCookieOptions())
 
-    return { ok: true }
+    redirect(from)
 }
 
 export async function adminLogout(): Promise<void> {
