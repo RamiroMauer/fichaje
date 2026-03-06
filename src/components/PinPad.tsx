@@ -58,7 +58,7 @@ export function PinPad({ onComplete, isError, onErrorReset }: Props) {
                         style={{
                             backgroundColor: index < pin.length ? 'var(--color-accent)' : '#1a1a1a',
                             boxShadow: index < pin.length
-                                ? '0 0 6px rgba(0,123,255,0.4)'
+                                ? 'none'
                                 : 'inset 2px 2px 5px #000000, inset -2px -2px 4px #202020',
                             transform: index < pin.length ? 'scale(1.1)' : 'scale(1)',
                             isolation: 'isolate',

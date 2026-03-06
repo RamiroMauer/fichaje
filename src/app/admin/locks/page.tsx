@@ -84,7 +84,7 @@ export default function LocksPage() {
                         className="w-20 h-20 rounded-full bg-[#121212] flex items-center justify-center"
                         style={{ boxShadow: 'var(--shadow-neu-flat)', isolation: 'isolate' }}
                     >
-                        <ShieldCheck size={36} className="text-[#007BFF]" style={{ filter: 'drop-shadow(0 0 8px rgba(0,123,255,0.5))' }} />
+                        <ShieldCheck size={36} className="text-[#007BFF]" />
                     </div>
                     <p className="text-gray-500 text-sm tracking-widest">SIN BLOQUEOS ACTIVOS</p>
                 </motion.div>

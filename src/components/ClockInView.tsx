@@ -24,19 +24,7 @@ export function ClockInView({ employeeName, onClockIn, onCancel }: Props) {
 
             <motion.button
                 onClick={onClockIn}
-                whileTap={{ scale: 0.92, boxShadow: "var(--shadow-neu-pressed)" }}
-                animate={{
-                    boxShadow: [
-                        "var(--shadow-neu-flat)",
-                        "0 0 10px rgba(0, 123, 255, 0.25), var(--shadow-neu-flat)",
-                        "var(--shadow-neu-flat)",
-                    ]
-                }}
-                transition={{
-                    repeat: Infinity,
-                    duration: 2.5,
-                    ease: "easeInOut"
-                }}
+                style={{ boxShadow: "var(--shadow-neu-flat)" }}
                 className={`
           w-56 h-56 rounded-full flex flex-col items-center justify-center 
           bg-gradient-to-br from-[#161616] to-[#101010] border-4 border-[var(--color-accent)] 

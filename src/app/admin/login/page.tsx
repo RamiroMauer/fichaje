@@ -31,7 +31,7 @@ export default function AdminLoginPage() {
                             isolation: 'isolate',
                         }}
                     >
-                        <Lock size={32} className="text-[#007BFF]" style={{ filter: 'drop-shadow(0 0 8px rgba(0,123,255,0.6))' }} />
+                        <Lock size={32} className="text-[#007BFF]" />
                     </motion.div>
                     <h1 className="text-2xl font-black tracking-widest text-white mb-1">
                         CASINO<span className="text-[#007BFF]">CLOCK</span>
