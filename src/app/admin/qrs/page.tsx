@@ -1,11 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { motion } from 'framer-motion'
-import { Download, Printer, QrCode, ExternalLink } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Download, Printer, QrCode, ExternalLink, RefreshCw, AlertTriangle, Check, X } from 'lucide-react'
 import { NeumorphicButton } from '@/components/NeumorphicButton'
 
-// Las URLs base se detectan del entorno en el cliente
 const BASE_URL = typeof window !== 'undefined'
     ? window.location.origin
     : 'https://ficha-indol.vercel.app'
@@ -19,20 +18,21 @@ const STATIONS = [
     { id: '6', label: 'CAJA 6' },
 ]
 
-function getQrUrl(stationId: string, size = 240) {
+function getQrUrl(stationId: string, size = 240, key = 0) {
     const target = `${BASE_URL}/s/${stationId}`
-    // API pública, sin key, dark theme
-    return `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(target)}&bgcolor=121212&color=ffffff&qzone=2&format=png`
+    const bust = key > 0 ? `&cb=${key}` : ''
+    return `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(target)}&bgcolor=121212&color=ffffff&qzone=2&format=png${bust}`
 }
 
-function StationQrCard({ id, label }: { id: string; label: string }) {
-    const [refreshKey, setRefreshKey] = useState(0)
+function StationQrCard({ id, label, globalKey }: { id: string; label: string; globalKey: number }) {
+    const [localKey, setLocalKey] = useState(0)
+    const [confirming, setConfirming] = useState(false)
     const stationUrl = `${BASE_URL}/s/${id}`
-    const qrSrc = getQrUrl(id) + (refreshKey > 0 ? `&r=${refreshKey}` : '')
+    const key = globalKey + localKey
+    const qrSrc = getQrUrl(id, 240, key)
 
     const handleDownload = async () => {
-        // Descarga el QR como PNG con el nombre de la caja
-        const res = await fetch(getQrUrl(id, 600))
+        const res = await fetch(getQrUrl(id, 600, key))
         const blob = await res.blob()
         const a = document.createElement('a')
         a.href = URL.createObjectURL(blob)
@@ -56,7 +56,7 @@ function StationQrCard({ id, label }: { id: string; label: string }) {
           </style>
         </head>
         <body>
-          <img src="${getQrUrl(id, 600)}" />
+          <img src="${getQrUrl(id, 600, key)}" />
           <h2>${label}</h2>
           <p>${stationUrl}</p>
           <script>window.onload = () => { window.print(); window.close(); }<\/script>
@@ -64,6 +64,11 @@ function StationQrCard({ id, label }: { id: string; label: string }) {
       </html>
     `)
         win.document.close()
+    }
+
+    const handleRegenConfirm = () => {
+        setLocalKey(k => k + 1)
+        setConfirming(false)
     }
 
     return (
@@ -95,7 +100,7 @@ function StationQrCard({ id, label }: { id: string; label: string }) {
                 />
             </div>
 
-            {/* URL de la estación */}
+            {/* URL */}
             <a
                 href={stationUrl}
                 target="_blank"
@@ -106,24 +111,62 @@ function StationQrCard({ id, label }: { id: string; label: string }) {
                 /s/{id}
             </a>
 
-            {/* Acciones */}
-            <div className="flex gap-2 w-full">
-                <NeumorphicButton onClick={handleDownload} className="flex-1 py-2.5 gap-1.5 text-xs">
-                    <Download size={13} /> Descargar
-                </NeumorphicButton>
-                <NeumorphicButton onClick={handlePrint} className="flex-1 py-2.5 gap-1.5 text-xs">
-                    <Printer size={13} /> Imprimir
-                </NeumorphicButton>
-            </div>
+            {/* Confirmación de regeneración inline */}
+            <AnimatePresence mode="wait">
+                {confirming ? (
+                    <motion.div
+                        key="confirm"
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        className="w-full neu-pressed p-4 flex flex-col items-center gap-3"
+                    >
+                        <div className="flex items-center gap-2 text-yellow-500 text-xs font-bold tracking-wider">
+                            <AlertTriangle size={13} /> ¿Regenerar este QR?
+                        </div>
+                        <div className="flex gap-2 w-full">
+                            <NeumorphicButton onClick={handleRegenConfirm} className="flex-1 py-2 gap-1.5 text-xs text-[#007BFF]">
+                                <Check size={12} /> Sí
+                            </NeumorphicButton>
+                            <NeumorphicButton onClick={() => setConfirming(false)} className="flex-1 py-2 gap-1.5 text-xs text-gray-500">
+                                <X size={12} /> No
+                            </NeumorphicButton>
+                        </div>
+                    </motion.div>
+                ) : (
+                    <motion.div
+                        key="actions"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="flex flex-col gap-2 w-full"
+                    >
+                        <div className="flex gap-2">
+                            <NeumorphicButton onClick={handleDownload} className="flex-1 py-2.5 gap-1.5 text-xs">
+                                <Download size={13} /> Descargar
+                            </NeumorphicButton>
+                            <NeumorphicButton onClick={handlePrint} className="flex-1 py-2.5 gap-1.5 text-xs">
+                                <Printer size={13} /> Imprimir
+                            </NeumorphicButton>
+                        </div>
+                        <NeumorphicButton onClick={() => setConfirming(true)} className="w-full py-2.5 gap-1.5 text-xs text-gray-500">
+                            <RefreshCw size={13} /> Regenerar QR
+                        </NeumorphicButton>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </motion.div>
     )
 }
 
 export default function QrsPage() {
+    const [globalKey, setGlobalKey] = useState(0)
+    const [confirmingAll, setConfirmingAll] = useState(false)
+
     const handlePrintAll = () => {
         const imgs = STATIONS.map(s =>
             `<div class="card">
-         <img src="${getQrUrl(s.id, 500)}" />
+         <img src="${getQrUrl(s.id, 500, globalKey)}" />
          <h2>${s.label}</h2>
          <p>${BASE_URL}/s/${s.id}</p>
        </div>`
@@ -154,24 +197,61 @@ export default function QrsPage() {
         win.document.close()
     }
 
+    const handleRegenAll = () => {
+        setGlobalKey(k => k + 1)
+        setConfirmingAll(false)
+    }
+
     return (
         <div>
             {/* Header */}
-            <div className="flex items-center justify-between mb-10">
+            <div className="flex items-center justify-between mb-6">
                 <div>
                     <h2 className="text-3xl font-black tracking-widest text-white mb-1">QR CODES</h2>
                     <p className="text-xs text-gray-500 tracking-widest">ACCESOS POR ESTACIÓN</p>
                 </div>
-                <NeumorphicButton onClick={handlePrintAll} className="px-5 py-3 gap-2 text-sm">
-                    <Printer size={15} /> Imprimir todos
-                </NeumorphicButton>
+                <div className="flex gap-3 items-center">
+                    <NeumorphicButton onClick={handlePrintAll} className="px-5 py-3 gap-2 text-sm">
+                        <Printer size={15} /> Imprimir todos
+                    </NeumorphicButton>
+                    <NeumorphicButton onClick={() => setConfirmingAll(true)} className="px-5 py-3 gap-2 text-sm text-gray-500">
+                        <RefreshCw size={15} /> Regenerar todos
+                    </NeumorphicButton>
+                </div>
             </div>
+
+            {/* Confirmación global */}
+            <AnimatePresence>
+                {confirmingAll && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="neu-pressed p-5 mb-6 flex items-center justify-between gap-4"
+                    >
+                        <div className="flex items-center gap-3">
+                            <AlertTriangle size={18} className="text-yellow-500 shrink-0" />
+                            <p className="text-sm text-white font-semibold">
+                                ¿Estás seguro de que querés regenerar todos los QRs?
+                            </p>
+                        </div>
+                        <div className="flex gap-2 shrink-0">
+                            <NeumorphicButton onClick={handleRegenAll} className="px-4 py-2 gap-2 text-xs text-[#007BFF]">
+                                <Check size={13} /> Sí, regenerar
+                            </NeumorphicButton>
+                            <NeumorphicButton onClick={() => setConfirmingAll(false)} className="px-4 py-2 gap-2 text-xs text-gray-500">
+                                <X size={13} /> Cancelar
+                            </NeumorphicButton>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* Grid de QRs */}
             <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
                 {STATIONS.map((s, i) => (
                     <motion.div key={s.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}>
-                        <StationQrCard id={s.id} label={s.label} />
+                        <StationQrCard id={s.id} label={s.label} globalKey={globalKey} />
                     </motion.div>
                 ))}
             </div>
@@ -180,12 +260,10 @@ export default function QrsPage() {
             <div className="neu-pressed p-5 mt-8">
                 <div className="flex items-start gap-3">
                     <QrCode size={16} className="text-gray-500 shrink-0 mt-0.5" />
-                    <div>
-                        <p className="text-xs text-gray-400 leading-relaxed">
-                            Cada QR lleva al operario directamente a la pantalla de fichaje de esa caja.
-                            Los códigos se generan dinámicamente y siempre apuntan a la URL correcta del entorno activo.
-                        </p>
-                    </div>
+                    <p className="text-xs text-gray-400 leading-relaxed">
+                        Cada QR lleva al operario directamente a la pantalla de fichaje de esa caja.
+                        Los códigos se generan dinámicamente y siempre apuntan a la URL correcta del entorno activo.
+                    </p>
                 </div>
             </div>
         </div>
