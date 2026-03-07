@@ -2,7 +2,7 @@
 
 ## ¿Qué es?
 
-Sistema de fichaje digital para estaciones de caja (casino). Cada caja tiene un QR único que el cajero escanea para registrar su fichaje con PIN personal. Incluye un panel de administración completo para gestionar cajeros, estaciones y monitorear la actividad.
+Sistema de fichaje digital para estaciones de caja (casino). Cada caja tiene un QR único que el cajero escanea para registrar su fichaje (ENTRADA o SALIDA) con PIN personal. Incluye un panel de administración completo para gestionar cajeros, estaciones y monitorear la actividad.
 
 ---
 
@@ -21,13 +21,11 @@ Sistema de fichaje digital para estaciones de caja (casino). Cada caja tiene un 
 
 ## Diseño (Stealth Dark Neumorfism)
 
-- Fondo `#121212`
-- Acento interactivo `#007BFF`
-- Error en `#FF3B30`
-- Radios ≥ 24px, sombras neumórficas convexas/cóncavas
-- Clases utilitarias globales: `.neu-card`, `.neu-pressed`, `.neu-input` con `isolation: isolate`
+- Fondo `#121212`, acento `#007BFF`, error `#FF3B30`
+- Radios ≥ 24px, sombras neumórficas convexas/cóncavas sin glow
+- Clases utilitarias globales en `globals.css`: `.neu-card`, `.neu-pressed`, `.neu-input` con `isolation: isolate`
+- Regla core: `border-radius`, `background-color` y `box-shadow` siempre en el **mismo elemento**
 - Animaciones con Framer Motion (shake, spring, scale)
-- Sin glow/halo — sombras limpias y contenidas
 
 ---
 
@@ -36,46 +34,47 @@ Sistema de fichaje digital para estaciones de caja (casino). Cada caja tiene un 
 ```
 src/
 ├── app/
-│   ├── s/[station]/page.tsx     # Página de cada estación (Server Component)
+│   ├── s/[station]/page.tsx     # Estación individual (Server Component)
 │   ├── admin/
-│   │   ├── layout.tsx           # Layout del panel admin (sidebar + main)
+│   │   ├── layout.tsx           # Layout con sidebar
 │   │   ├── login/page.tsx       # Login del encargado
 │   │   ├── page.tsx             # Dashboard con métricas
 │   │   ├── cashiers/page.tsx    # CRUD de cajeros
-│   │   ├── stations/page.tsx    # Asignación (4 cajeros por caja)
-│   │   ├── pins/page.tsx        # Generación de PINs (mostrado solo 1 vez)
-│   │   ├── qrs/page.tsx         # Ver, descargar e imprimir QRs por caja
-│   │   ├── logs/page.tsx        # Historial de fichajes con filtros
+│   │   ├── stations/page.tsx    # Asignación 4 cajeros/caja
+│   │   ├── pins/page.tsx        # Generación de PINs (1 sola vez)
+│   │   ├── qrs/page.tsx         # Ver / descargar / imprimir / regenerar QRs
+│   │   ├── logs/page.tsx        # Historial con filtros (estación, cajero, tipo, fecha)
 │   │   └── locks/page.tsx       # Bloqueos activos por rate limit
 │   └── actions/
 │       ├── punch.ts             # Server Action: validar PIN + loguear fichaje
 │       └── admin.ts             # Server Actions del panel admin
 ├── components/
-│   ├── StationFlow.tsx          # Máquina de estados principal (UI pública)
+│   ├── StationFlow.tsx          # Máquina de estados: SELECT_EMPLOYEE → SELECT_TYPE → AUTH_PIN → SUCCESS/LOCKED
 │   ├── PinPad.tsx               # Teclado numérico 4 dígitos
-│   ├── ClockInView.tsx          # Vista de confirmación pre-fichaje
+│   ├── ClockInView.tsx          # Vista pre-fichaje (confirmación)
 │   ├── NeumorphicButton.tsx     # Botón base reutilizable
 │   └── admin/
-│       ├── AdminSidebar.tsx     # Navegación lateral del panel
-│       ├── AdminCard.tsx        # Card neumórfica de métricas
-│       ├── AdminTable.tsx       # Tabla genérica reutilizable
-│       └── AdminModal.tsx       # Modal neumórfico con animaciones
+│       ├── AdminSidebar.tsx     # Navegación lateral
+│       ├── AdminCard.tsx        # Card de métricas
+│       ├── AdminTable.tsx       # Tabla genérica
+│       └── AdminModal.tsx       # Modal con animaciones
+├── types/
+│   └── punch.ts                 # EventType ('ENTRY' | 'EXIT' | 'PUNCH') + helpers
 └── lib/
     ├── auth.ts                  # HMAC signing/verify + verifyTokenEdge (Edge Runtime)
     ├── supabase/
     │   ├── server.ts            # Cliente Supabase (anon + service role)
-    │   └── client.ts            # Cliente Supabase para el browser
-    └── env.ts                   # Validación "fail fast" de env vars
+    │   └── client.ts            # Cliente browser
+    └── env.ts                   # Validación fail-fast de env vars
 
-src/middleware.ts                # Protege /admin/* — verifica cookie de sesión (Edge)
+src/middleware.ts                # Protege /admin/* vía cookie HMAC (Edge Runtime)
 
 supabase/
-├── schema.sql                   # Definición de tablas y RLS
-├── seed.sql                     # Estaciones + cajeros de prueba (PIN 1234)
+├── schema.sql                   # Tablas + RLS
+├── seed.sql                     # Cajas + cajeros de prueba
 └── migrations/
-    └── 001_add_cashier_active.sql  # Agrega columna is_active a cashiers
-
-public/qrs/                      # QRs generados apuntando a /s/1..6
+    ├── 001_add_cashier_active.sql   # is_active en cashiers
+    └── 002_add_event_type.sql       # event_type en punch_logs (ENTRY/EXIT/PUNCH)
 ```
 
 ---
@@ -86,55 +85,64 @@ public/qrs/                      # QRs generados apuntando a /s/1..6
 
 | Tabla | Descripción |
 |---|---|
-| `stations` | Las 6 cajas (id: "1" a "6") |
+| `stations` | Las 6 cajas (id: "1"–"6") |
 | `cashiers` | Cajeros con nombre, UUID e `is_active` |
-| `station_assignments` | Qué cajeros pertenecen a cada caja (exactamente 4) |
-| `cashier_pins` | Hash bcrypt del PIN de cada cajero |
+| `station_assignments` | 4 cajeros por caja |
+| `cashier_pins` | Hash bcrypt del PIN |
 | `pin_attempts` | Rate limit: intentos y bloqueo temporal |
-| `punch_logs` | Log de cada fichaje realizado |
+| `punch_logs` | Historial con `action`, `event_type` y `device_info` |
+
+### Columnas clave de `punch_logs`
+
+| Columna | Tipo | Descripción |
+|---|---|---|
+| `action` | TEXT | Compatibilidad legacy (`PUNCH`, `ENTRY`, `EXIT`) |
+| `event_type` | TEXT | `ENTRY`, `EXIT`, `PUNCH` — con CHECK constraint |
 
 ### Seguridad
 - RLS habilitado en todas las tablas
-- `SUPABASE_SERVICE_ROLE_KEY` **solo en el servidor** (Server Actions)
-- La `ANON_KEY` pública puede leer estaciones/cajeros vía RLS
+- `SUPABASE_SERVICE_ROLE_KEY` solo en servidor (Server Actions)
+- `ANON_KEY` pública puede leer estaciones/cajeros vía RLS
 
 ---
 
-## Panel de Administración
-
-Acceso: `/admin/login` — protegido por contraseña + cookie `httpOnly` firmada con HMAC.
-
-| Sección | Funcionalidad |
-|---|---|
-| Dashboard | Métricas en tiempo real: cajeros activos, estaciones, fichajes del día, bloqueos |
-| Cajeros | Crear, editar, activar/desactivar |
-| Estaciones | Asignar exactamente 4 cajeros por caja |
-| PINs | Generar PIN 4 dígitos (muestra solo una vez, guarda hash bcrypt) |
-| QR Codes | Ver, descargar (PNG 600px) e imprimir QRs por caja. Regeneración con confirmación |
-| Logs | Historial de fichajes con filtros por estación, cajero y rango de fechas |
-| Bloqueos | Ver y desbloquear cajeros con rate limit activo |
-
----
-
-## Flujo Principal (Cajero)
+## Flujo de Fichaje (Cajero)
 
 ```
 [Escaneo QR] → /s/1
     ↓
 [Selección de cajero]
     ↓
-[PIN 4 dígitos]
+[Selección ENTRADA / SALIDA]   ← nuevo
     ↓
-[Server Action: punchCashier()]
-    ├── Rate limit check (pin_attempts)
+[PIN 4 dígitos]  (con badge del tipo elegido)
+    ↓
+[Server Action: punchCashier({ eventType })]
+    ├── Rate limit check
     ├── bcrypt.compare(pin, pin_hash)
-    ├── INSERT en punch_logs
-    └── Reset de intentos fallidos
+    ├── INSERT en punch_logs (event_type = 'ENTRY' o 'EXIT')
+    └── Reset intentos fallidos
     ↓
-[Éxito] → animación ✓ + reset 3s
+[Éxito] → "¡Entrada registrada!" / "¡Salida registrada!" + reset 3s
 [Error]  → shake + texto rojo #FF3B30
-[Lock]   → pantalla BLOQUEADO + countdown 60s
+[Lock]   → BLOQUEADO + countdown 60s
 ```
+
+---
+
+## Panel de Administración
+
+Acceso: `/admin/login` — contraseña + cookie `httpOnly` HMAC firmada.
+
+| Sección | Funcionalidad |
+|---|---|
+| Dashboard | Métricas: cajeros activos, estaciones, fichajes del día, bloqueos |
+| Cajeros | Crear, editar, activar/desactivar |
+| Estaciones | Asignar exactamente 4 cajeros por caja |
+| PINs | Generar PIN 4 dígitos (muestra solo una vez, guarda hash) |
+| QR Codes | Ver, descargar (PNG 600px), imprimir individual o todos. Regeneración con confirmación |
+| Logs | Historial con filtros: estación, cajero, rango de fechas, **tipo (ENTRADA/SALIDA/Legado)** |
+| Bloqueos | Ver y desbloquear rate limits activos |
 
 ---
 
@@ -143,12 +151,12 @@ Acceso: `/admin/login` — protegido por contraseña + cookie `httpOnly` firmada
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://kgiugfhxguxrtpkokrri.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=...
-SUPABASE_SERVICE_ROLE_KEY=...    ← Solo server, NUNCA al cliente
-ADMIN_PASSWORD=...               ← Contraseña del panel admin
-ADMIN_SESSION_SECRET=...         ← Secreto HMAC para firmar la cookie de sesión
+SUPABASE_SERVICE_ROLE_KEY=...        ← Solo server
+ADMIN_PASSWORD=...                   ← Contraseña del panel admin
+ADMIN_SESSION_SECRET=...             ← Secreto HMAC para la cookie de sesión
 ```
 
-Ver `ENV_SETUP.md` para instrucciones completas de configuración local y Vercel.
+Ver `ENV_SETUP.md` para instrucciones completas.
 
 ---
 
@@ -157,27 +165,25 @@ Ver `ENV_SETUP.md` para instrucciones completas de configuración local y Vercel
 | Recurso | URL |
 |---|---|
 | Panel Admin | https://ficha-indol.vercel.app/admin/login |
-| Caja 1 | https://ficha-indol.vercel.app/s/1 |
-| Caja 2 | https://ficha-indol.vercel.app/s/2 |
-| Caja 3 | https://ficha-indol.vercel.app/s/3 |
-| Caja 4 | https://ficha-indol.vercel.app/s/4 |
-| Caja 5 | https://ficha-indol.vercel.app/s/5 |
-| Caja 6 | https://ficha-indol.vercel.app/s/6 |
+| Caja 1–6 | https://ficha-indol.vercel.app/s/[1-6] |
 
 ---
 
 ## Estado Actual
 
-- [x] Estaciones `/s/[station]` funcionales con Supabase
+- [x] Estaciones `/s/[station]` funcionales
 - [x] PIN hasheado con bcrypt + rate limit + logs
-- [x] Panel de administración completo (login, cajeros, estaciones, PINs, QRs, logs, bloqueos)
-- [x] Autenticación HMAC con Edge Runtime compatible
-- [x] QR codes con vista, descarga e impresión desde el panel
-- [x] Sistema de diseño neumórfico centralizado en `globals.css`
+- [x] Diferenciación **ENTRADA / SALIDA** explícita en el fichaje
+- [x] Panel de administración completo (7 secciones)
+- [x] Autenticación HMAC compatible con Edge Runtime
+- [x] QR codes: vista, descarga, impresión y regeneración con confirmación
+- [x] Sistema de diseño neumórfico centralizado, sin glow exagerado
+- [x] Tipos compartidos en `src/types/punch.ts`
+- [x] Migración DB `002_add_event_type.sql` lista para aplicar en Supabase
 
 ## Próximos pasos sugeridos
 
-- [ ] Diferenciación ENTRADA / SALIDA (actualmente es `PUNCH` genérico)
-- [ ] Dashboard de reportes con gráficos de `punch_logs`
+- [ ] Ejecutar migración `002_add_event_type.sql` en Supabase SQL Editor
+- [ ] Dashboard de reportes con gráficos de `punch_logs` (entradas vs salidas por turno)
 - [ ] Notificaciones al supervisor ante bloqueos
 - [ ] Soporte multi-turno (horarios programados por cajero)
